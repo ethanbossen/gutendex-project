@@ -1,10 +1,10 @@
-###Using the Gutendex API to Search Project Gutenberg’s Catalog
+Using the Gutendex API to Search Project Gutenberg’s Catalog
 
-##Project Overview
+Project Overview
 
 Using the Gutendex API, develop a tool that allows users to search Project Gutenberg’s catalog of books. The program should:
 
-#Requirements
+Requirements
 	•	Be a command-line application written in Node.js (does not rely on a web browser). However, if you want to create an Electron App instead, that is allowed.
 	•	Allow users to search for a book by a word in the title or by author name.
 	•	Fetch the full-text (not images) of a book once the user selects one from the search results and display it for reading.
@@ -16,7 +16,7 @@ Using the Gutendex API, develop a tool that allows users to search Project Guten
 	•	Keep track of the last ten books the user read and provide a menu that allows them to select those books directly without searching again.
 	•	Handle user input errors and network errors gracefully to prevent crashes.
 
-#Concepts to Understand Before Coding
+Concepts to Understand Before Coding
 
 Before starting, make sure you fully understand:
 	1.	What Project Gutenberg is
