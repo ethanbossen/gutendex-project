@@ -1,4 +1,5 @@
 url = "https://gutendex.com/books/?search="
+IDurl = "https://gutendex.com/books/"
 
 const readline = require('readline');
 
@@ -34,8 +35,13 @@ async function getSearchTerm() {
     }
 
     const second_term = await promtUser("What id would you like to fetch? ");
+    const response2 = await fetch(IDurl + "" + second_term)
+    if (!response2.ok) {
+        throw new Error(`Response status: ${response2.status}`);
+    }
 
-    setTimeout(console.log(json), 7000);
+    console.log(response2);
+
 }
 
 getSearchTerm();
