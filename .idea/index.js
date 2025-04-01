@@ -24,7 +24,7 @@ async function getSearchTerm() {
         throw new Error(`Response status: ${response.status}`);
     }
 
-    const json = await response.json();
+    let json = await response.json();
     const book_count = json.count;
     console.log(`Found ${book_count} books.`);
 
@@ -39,8 +39,19 @@ async function getSearchTerm() {
     if (!response2.ok) {
         throw new Error(`Response status: ${response2.status}`);
     }
-
-    console.log(response2);
+    json = await response2.json();
+    
+    const formats = json.formats;
+    
+    const textURL = formats['text/plain; charset=us-ascii'];
+    
+    const response3 = await fetch(textURL);
+    if (!response3.ok) {
+        throw new Error(`Response status: ${response2.status}`);
+    }
+    
+    text = await response3.text();
+    
 
 }
 
