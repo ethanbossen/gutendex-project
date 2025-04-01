@@ -1,6 +1,9 @@
 url = "https://gutendex.com/books/?search="
 IDurl = "https://gutendex.com/books/"
 
+const PAGE_SIZE = 1000; // Number of characters per page
+let pages = [];
+
 const readline = require('readline');
 
 const rl = readline.createInterface({
@@ -51,7 +54,13 @@ async function getSearchTerm() {
     }
     
     text = await response3.text();
+    //Add code to save this text
     
+    // Split text into pages of PAGE_SIZE characters
+    for (let i = 0; i < text.length; i += PAGE_SIZE) {
+        pages.push(text.slice(i, i + PAGE_SIZE));
+    }
+    console.log(pages[0])
 
 }
 
