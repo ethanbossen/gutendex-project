@@ -5,6 +5,7 @@ const PAGE_SIZE = 1000; // Number of characters per page
 let pages = [];
 
 const readline = require('readline');
+const fs = require('fs');
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -32,7 +33,7 @@ async function getSearchTerm() {
     console.log(`Found ${book_count} books.`);
 
     results = json.results;
-
+    
     for (const book of results) {
         console.log(`${book.title}, ID:${book.id}`);
     }
@@ -44,6 +45,8 @@ async function getSearchTerm() {
     }
     json = await response2.json();
     
+    let title = json.title
+
     const formats = json.formats;
     
     const textURL = formats['text/plain; charset=us-ascii'];
@@ -61,7 +64,21 @@ async function getSearchTerm() {
         pages.push(text.slice(i, i + PAGE_SIZE));
     }
     console.log(pages[0])
-
+    saveFile(text, title)
 }
 
+function saveFile (text, title) {
+    //From AI
+    const sanitizedTitle = title
+        .replace(/[/\\?%*:|"<>]/g, '_') // Replace invalid file characters
+        .replace(/\s+/g, '_')          // Replace spaces with underscores
+        .substring(0, 100);            // Limit length to avoid issues with long paths
+    
+    const filename = `${sanitizedTitle}.txt`;
+    try{
+        fs.writeFileSync(filename, text)
+    }catch (error) {
+        console.log(error)
+    }
+}
 getSearchTerm();
