@@ -20,7 +20,34 @@ async function promtUser(promt){
 }
 
 async function getSearchTerm() {
-    //Add code to ask the user if they want to receive one of the saved books
+    const loadSaved = await promtUser("Would you like to open a recently read book? (y/n): ");
+    if (loadSaved.toLowerCase() === 'y') {
+        if (fs.existsSync(save_details_filename)) {
+            const saved = JSON.parse(fs.readFileSync(save_details_filename, 'utf8'));
+            if (saved.Saved_Books.length === 0) {
+                console.log("No saved books.");
+            } else {
+                saved.Saved_Books.forEach((book, index) => {
+                    console.log(`${index + 1}: ${book.title}`);
+                });
+                const choice = parseInt(await promtUser("Enter the number of the book to read: "));
+                if (!isNaN(choice) && choice >= 1 && choice <= saved.Saved_Books.length) {
+                    const book = saved.Saved_Books[choice - 1];
+                    if (fs.existsSync(book.filename)) {
+                        const text = fs.readFileSync(book.filename, 'utf8');
+                        printBook(text); 
+                        return;
+                    } else {
+                        console.log("Saved file not found.");
+                    }
+                } else {
+                    console.log("Invalid selection.");
+                }
+            }
+        } else {
+            console.log("No saved book data file found.");
+        }
+    }
 
     const term = await promtUser("What would you like to search for? ");
 
