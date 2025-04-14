@@ -42,40 +42,59 @@ async function getSearchTerm() {
     if (loadSaved.toLowerCase() === 'y') {
         if (!fs.existsSync(save_details_filename)) {
             console.log("No saved book data found.");
+            fs.writeFileSync(save_details_filename, JSON.stringify({ "Saved_Books": [] }));
         } else {
-            const saved = JSON.parse(fs.readFileSync(save_details_filename, 'utf8'));
-            
-            if (saved.Saved_Books.length === 0) {
-                console.log("No saved books available.");
-            } else {
-                // Keep asking until valid selection or user gives up
-                while (true) {
-                    console.log("\nSaved books:");
-                    saved.Saved_Books.forEach((book, index) => {
-                        console.log(`${index + 1}: ${book.title}`);
-                    });
+            //lines 48-63 are AI
+            try {
+                const savedData = fs.readFileSync(save_details_filename, 'utf8');
+                const saved = JSON.parse(savedData);
+                
+                // Filter out any books whose files don't exist anymore
+                const validBooks = saved.Saved_Books.filter(book => fs.existsSync(book.filename));
+                
+                // Update the saved file if we found any missing books
+                if (validBooks.length !== saved.Saved_Books.length) {
+                    saved.Saved_Books = validBooks;
+                    fs.writeFileSync(save_details_filename, JSON.stringify(saved));
+                }
+                
+                if (validBooks.length === 0) {
+                    console.log("No saved books available.");
+                } else {
+                    // Keep asking until valid selection or user gives up
+                    while (true) {
+                        console.log("\nSaved books:");
+                        validBooks.forEach((book, index) => {
+                            console.log(`${index + 1}: ${book.title}`);
+                        });
 
-                    const choice = await promtUser("Enter the number of the book to read (or press Enter to cancel): ");
-                    
-                    if (choice === "") {
-                        break;
-                    }
-                    
-                    const choiceNum = parseInt(choice);
-                    
-                    if (isNaN(choiceNum) || choiceNum < 1 || choiceNum > saved.Saved_Books.length) {
-                        continue;
-                    }
-                    
-                    const book = saved.Saved_Books[choiceNum - 1];
-                    if (fs.existsSync(book.filename)) {
-                        const text = fs.readFileSync(book.filename, 'utf8');
-                        await printBook(text);
-                        return;
-                    } else {
-                        console.log("Error: Saved file not found.");
+                        const choice = await promtUser("Enter the number of the book to read (or press Enter to cancel): ");
+                        
+                        if (choice === "") {
+                            break;
+                        }
+                        
+                        const choiceNum = parseInt(choice);
+                        
+                        if (isNaN(choiceNum) || choiceNum < 1 || choiceNum > validBooks.length) {
+                            console.log("Invalid selection. Please try again.");
+                            continue;
+                        }
+                        
+                        const book = validBooks[choiceNum - 1];
+                        try {
+                            const text = fs.readFileSync(book.filename, 'utf8');
+                            await printBook(text);
+                            return;
+                        } catch (error) {
+                            console.log(`Error reading file: ${error.message}`);
+                        }
                     }
                 }
+            } catch (error) {
+                console.log(`Error reading saved books: ${error.message}`);
+                // Reset the saved books file
+                fs.writeFileSync(save_details_filename, JSON.stringify({ "Saved_Books": [] }));
             }
         }
     }
