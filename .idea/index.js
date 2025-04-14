@@ -1,3 +1,5 @@
+// Asa Rowntree, Ethan Bossenbroek, Charlie Greco
+
 url = "https://gutendex.com/books/?search="
 IDurl = "https://gutendex.com/books/"
 save_details_filename = "Save_Details.json"
@@ -55,7 +57,6 @@ async function getSearchTerm() {
 
                     const choice = await promtUser("Enter the number of the book to read (or press Enter to cancel): ");
                     
-                    // If user just presses Enter, cancel
                     if (choice === "") {
                         break;
                     }
