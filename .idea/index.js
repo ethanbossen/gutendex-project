@@ -19,33 +19,63 @@ async function promtUser(promt){
     })
 }
 
+async function main() {
+    let continueSearching = true;
+    
+    while (continueSearching) {
+        await getSearchTerm();
+        
+        const answer = await promtUser("Would you like to search for another book? (y/n): ");
+        if (answer.toLowerCase() !== 'y') {
+            continueSearching = false;
+        }
+    }
+    
+    rl.close();
+    console.log("Goodbye!");
+}
+
 async function getSearchTerm() {
     const loadSaved = await promtUser("Would you like to open a recently read book? (y/n): ");
     if (loadSaved.toLowerCase() === 'y') {
-        if (fs.existsSync(save_details_filename)) {
+        if (!fs.existsSync(save_details_filename)) {
+            console.log("No saved book data found.");
+        } else {
             const saved = JSON.parse(fs.readFileSync(save_details_filename, 'utf8'));
+            
             if (saved.Saved_Books.length === 0) {
-                console.log("No saved books.");
+                console.log("No saved books available.");
             } else {
-                saved.Saved_Books.forEach((book, index) => {
-                    console.log(`${index + 1}: ${book.title}`);
-                });
-                const choice = parseInt(await promtUser("Enter the number of the book to read: "));
-                if (!isNaN(choice) && choice >= 1 && choice <= saved.Saved_Books.length) {
-                    const book = saved.Saved_Books[choice - 1];
+                // Keep asking until valid selection or user gives up
+                while (true) {
+                    console.log("\nSaved books:");
+                    saved.Saved_Books.forEach((book, index) => {
+                        console.log(`${index + 1}: ${book.title}`);
+                    });
+
+                    const choice = await promtUser("Enter the number of the book to read (or press Enter to cancel): ");
+                    
+                    // If user just presses Enter, cancel
+                    if (choice === "") {
+                        break;
+                    }
+                    
+                    const choiceNum = parseInt(choice);
+                    
+                    if (isNaN(choiceNum) || choiceNum < 1 || choiceNum > saved.Saved_Books.length) {
+                        continue;
+                    }
+                    
+                    const book = saved.Saved_Books[choiceNum - 1];
                     if (fs.existsSync(book.filename)) {
                         const text = fs.readFileSync(book.filename, 'utf8');
-                        printBook(text); 
+                        await printBook(text);
                         return;
                     } else {
-                        console.log("Saved file not found.");
+                        console.log("Error: Saved file not found.");
                     }
-                } else {
-                    console.log("Invalid selection.");
                 }
             }
-        } else {
-            console.log("No saved book data file found.");
         }
     }
 
@@ -160,4 +190,7 @@ function printBook (text) {
     }
 }
 
-getSearchTerm()
+main().catch(err => {
+    console.error("An error occurred:", err);
+    process.exit(1);
+});
