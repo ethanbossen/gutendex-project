@@ -52,6 +52,7 @@ async function getSearchTerm() {
     const term = await promtUser("What would you like to search for? ");
 
     const response = await fetch(url + "" + term)
+    
     if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
     }
@@ -66,11 +67,26 @@ async function getSearchTerm() {
         console.log(`${book.title}, ID:${book.id}`);
     }
 
-    const second_term = await promtUser("What id would you like to fetch? ");
-    const response2 = await fetch(IDurl + "" + second_term)
+
+    let selectedBook = null;
+    while (!selectedBook) {
+        const second_term = await promtUser("What id would you like to fetch? ");
+        const bookId = parseInt(second_term);
+        if (isNaN(second_term)) {
+            console.log("Invalid input. Please enter a numeric ID.");
+            continue;
+        }
+
+        selectedBook = results.find(book => book.id === bookId);
+        if (!selectedBook) {
+            console.log("That ID wasn't in the search results. Please try again.");
+        }
+    }
+
+    const response2 = await fetch(IDurl + selectedBook.id);
     if (!response2.ok) {
-        console.log("\nResult not available")
-        return
+        console.log("\nResult not available");
+        return;
     }
     json = await response2.json();
     
